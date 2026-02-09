@@ -59,10 +59,11 @@ body{
 #viewport-cidade{
     width:100vw;
     height:calc(100vh - 162px);
-    overflow:auto;
+    overflow:hidden;
     margin-top:92px;
     background:#000;
     cursor:grab;
+    touch-action:none;
 }
 #viewport-cidade:active{cursor:grabbing}
 .mapa-mundo{
@@ -196,52 +197,43 @@ body{
     <div class="nav-item"><span>News</span></div>
 </div>
 
-<!-- ACADEMIA -->
+<!-- MODAIS ACADEMIA, CRIME, LOJA -->
 <div id="modal-academia" class="modal-overlay">
 <div class="modal-content">
 <h3 style="text-align:center;color:#58a6ff">Treinamento</h3>
 <div id="feed-academia" class="feedback-msg"></div>
-
 <div class="item-card"><span>💪 Força</span><button class="btn-action" onclick="treinar()">Treinar</button></div>
 <div class="item-card"><span>❤️ Vitalidade</span><button class="btn-action" onclick="treinar()">Treinar</button></div>
 <div class="item-card"><span>⚡ Velocidade</span><button class="btn-action" onclick="treinar()">Treinar</button></div>
 <div class="item-card"><span>🎯 Destreza</span><button class="btn-action" onclick="treinar()">Treinar</button></div>
-
 <button class="btn-fechar" onclick="fecharModais()">FECHAR</button>
 </div>
 </div>
 
-<!-- CRIMES -->
 <div id="modal-crime" class="modal-overlay">
 <div class="modal-content">
 <h3 style="text-align:center;color:#e94560">Crimes</h3>
 <div id="feed-crime" class="feedback-msg"></div>
-
 <div class="item-card"><span>🏪 Roubo simples</span><button class="btn-action" onclick="crime()">10⚡</button></div>
 <div class="item-card"><span>🚗 Assalto</span><button class="btn-action" onclick="crime()">20⚡</button></div>
 <div class="item-card"><span>🏦 Banco</span><button class="btn-action" onclick="crime()">30⚡</button></div>
-
 <button class="btn-fechar" onclick="fecharModais()">FECHAR</button>
 </div>
 </div>
 
-<!-- LOJA -->
 <div id="modal-loja" class="modal-overlay">
 <div class="modal-content">
 <h3 style="text-align:center;color:gold">Mercado</h3>
 <div id="feed-loja" class="feedback-msg"></div>
-
 <div class="item-card"><span>🔫 Pistola</span><button class="btn-action" onclick="comprar(500)">$500</button></div>
 <div class="item-card"><span>🦺 Colete</span><button class="btn-action" onclick="comprar(800)">$800</button></div>
 <div class="item-card"><span>💊 Kit Médico</span><button class="btn-action" onclick="comprar(300)">$300</button></div>
-
 <button class="btn-fechar" onclick="fecharModais()">FECHAR</button>
 </div>
 </div>
 
 <script>
 let money=500, ene=1620, eneMax=2040, exp=35336, expMax=76610;
-
 const crimes=[
  {c:10,min:80,max:150,xp:300},
  {c:20,min:180,max:300,xp:700},
@@ -294,15 +286,30 @@ function atualizarUI(){
 }
 atualizarUI();
 
-/* DRAG MAPA */
+/* DRAG MAPA FUNCIONAL */
 const v=document.getElementById('viewport-cidade');
 let d=false,sx,sy,sl,st;
-v.addEventListener('mousedown',e=>{d=true;sx=e.pageX;sy=e.pageY;sl=v.scrollLeft;st=v.scrollTop});
-v.addEventListener('mouseup',()=>d=false);
-v.addEventListener('mousemove',e=>{if(!d)return;v.scrollLeft=sl-(e.pageX-sx);v.scrollTop=st-(e.pageY-sy)});
-v.addEventListener('touchstart',e=>{d=true;sx=e.touches[0].pageX;sy=e.touches[0].pageY;sl=v.scrollLeft;st=v.scrollTop});
-v.addEventListener('touchmove',e=>{if(!d)return;v.scrollLeft=sl-(e.touches[0].pageX-sx);v.scrollTop=st-(e.touches[0].pageY-sy)});
-v.addEventListener('touchend',()=>d=false);
+
+v.addEventListener('mousedown', e => {
+    d=true; sx=e.clientX; sy=e.clientY; sl=v.scrollLeft; st=v.scrollTop;
+});
+v.addEventListener('mousemove', e => {
+    if(!d) return;
+    v.scrollLeft = sl - (e.clientX - sx);
+    v.scrollTop = st - (e.clientY - sy);
+});
+v.addEventListener('mouseup', () => d=false);
+v.addEventListener('mouseleave', () => d=false);
+
+v.addEventListener('touchstart', e => {
+    d=true; sx=e.touches[0].clientX; sy=e.touches[0].clientY; sl=v.scrollLeft; st=v.scrollTop;
+});
+v.addEventListener('touchmove', e => {
+    if(!d) return;
+    v.scrollLeft = sl - (e.touches[0].clientX - sx);
+    v.scrollTop = st - (e.touches[0].clientY - sy);
+});
+v.addEventListener('touchend', () => d=false);
 </script>
 
 </body>
