@@ -1,0 +1,309 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>City of Mafia - evilDrock</title>
+
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+body{
+    background:#020408;
+    color:#fff;
+    font-family:Arial,sans-serif;
+    overflow:hidden;
+    height:100vh;
+    user-select:none;
+}
+
+/* HEADER */
+.header-container{
+    position:fixed;top:0;width:100%;z-index:100;
+    background:#0d2135;border-bottom:2px solid #000;
+}
+.top-bar{display:flex;height:50px;background:#0a1c2e;border-bottom:1px solid #1a3a5a}
+.profile-section{width:60px;border-right:2px solid #000;display:flex;align-items:center;justify-content:center}
+.avatar-box{width:42px;height:42px;border:1px solid gold;background:#333}
+
+.resources-grid{
+    flex:1;display:grid;
+    grid-template-columns:1.2fr 1fr 1.5fr;
+    gap:2px;background:#000;padding:2px;
+}
+.res-box{background:#0d1b2a;display:flex;align-items:center;padding:0 5px;border:1px solid #1a3a5a}
+.char-nick{font-size:13px;font-weight:bold}
+.res-value{font-size:11px;font-weight:bold;flex:1;text-align:center}
+.res-icon{width:14px;margin-right:4px}
+
+/* STATUS */
+.status-bar-row{
+    display:grid;grid-template-columns:repeat(4,1fr);
+    background:#0a1c2e;padding:4px;gap:4px;
+}
+.status-text{font-size:8px;text-align:center;font-weight:bold;margin-bottom:2px}
+.progress-bg{height:6px;background:#222;border:1px solid #000;border-radius:2px;overflow:hidden}
+.progress-fill{height:100%;transition:.2s}
+.fill-energy{background:#00d2ff}
+.fill-courage{background:#33ff33}
+.fill-moral{background:#ffaa00}
+.fill-health{background:#ff3333}
+
+/* EXP */
+.exp-row{display:flex;background:#000;height:18px;align-items:center;border-top:1px solid #333}
+.lv-box{font-size:10px;font-weight:bold;padding:0 8px;color:#ff9d00}
+.exp-bar-container{flex:1;height:100%;background:#222;position:relative}
+.exp-fill{height:100%;background:linear-gradient(#ffe066,#ffcc00);transition:.2s}
+.exp-text{position:absolute;width:100%;text-align:center;font-size:9px;line-height:18px;font-weight:bold;text-shadow:1px 1px #000}
+
+/* MAPA */
+#viewport-cidade{
+    width:100vw;
+    height:calc(100vh - 162px);
+    overflow:auto;
+    margin-top:92px;
+    background:#000;
+    cursor:grab;
+}
+#viewport-cidade:active{cursor:grabbing}
+.mapa-mundo{
+    width:2400px;height:1200px;position:relative;
+    background:url('map.jpg') center/cover;
+}
+.predio-container{
+    position:absolute;display:flex;flex-direction:column;
+    align-items:center;cursor:pointer;
+}
+.icone-mapa{width:55px;filter:drop-shadow(0 0 8px rgba(0,210,255,.7))}
+.predio-label{
+    background:rgba(0,40,80,.9);
+    font-size:10px;font-weight:bold;
+    padding:2px 8px;border:1px solid #00d2ff;
+    border-radius:4px;white-space:nowrap;
+}
+
+/* MENU */
+.bottom-nav{
+    position:fixed;bottom:0;width:100%;height:70px;
+    background:#000;border-top:2px solid #444;
+    display:grid;grid-template-columns:repeat(6,1fr);
+    gap:3px;padding:4px;z-index:100;
+}
+.nav-item{
+    background:linear-gradient(#2a82c9,#154b7d);
+    border:1px solid #000;border-radius:4px;
+    display:flex;flex-direction:column;
+    align-items:center;justify-content:center;
+    cursor:pointer;
+}
+.nav-item span{font-size:8px;font-weight:bold;text-transform:uppercase}
+
+/* MODAIS */
+.modal-overlay{
+    display:none;position:fixed;inset:0;
+    background:rgba(0,0,0,.9);
+    z-index:200;
+    justify-content:center;align-items:center;
+}
+.modal-content{
+    background:#1a2a3a;
+    width:85%;max-width:320px;
+    border:2px solid #34495e;
+    border-radius:8px;padding:15px;
+}
+.feedback-msg{
+    font-size:12px;font-weight:bold;
+    text-align:center;min-height:15px;margin-bottom:10px;
+}
+.msg-success{color:#2ecc71}
+.msg-error{color:#e74c3c}
+
+.item-card{
+    background:#0d1b2a;padding:10px;
+    border-bottom:1px solid #34495e;
+    display:flex;justify-content:space-between;
+    align-items:center;margin-bottom:5px;
+}
+.btn-action{
+    background:#27ae60;border:none;
+    padding:6px 12px;border-radius:4px;
+    color:#fff;font-weight:bold;cursor:pointer;
+}
+.btn-fechar{
+    background:#c0392b;width:100%;
+    padding:10px;border:none;border-radius:4px;
+    color:#fff;font-weight:bold;margin-top:10px;
+}
+</style>
+</head>
+
+<body>
+
+<!-- HEADER -->
+<div class="header-container">
+    <div class="top-bar">
+        <div class="profile-section"><div class="avatar-box"></div></div>
+        <div class="resources-grid">
+            <div class="res-box"><span class="char-nick">evilDrock</span></div>
+            <div class="res-box"><img class="res-icon" src="https://cdn-icons-png.flaticon.com/512/217/217853.png"><span class="res-value" style="color:#ffcc00">801111</span></div>
+            <div class="res-box"><img class="res-icon" src="https://cdn-icons-png.flaticon.com/512/3251/3251383.png"><span class="res-value" id="txt-money">500</span></div>
+        </div>
+    </div>
+
+    <div class="status-bar-row">
+        <div>
+            <span class="status-text" id="val-ene">1620/2040</span>
+            <div class="progress-bg"><div id="bar-ene" class="progress-fill fill-energy"></div></div>
+        </div>
+        <div><span class="status-text">103/103</span><div class="progress-bg"><div class="progress-fill fill-courage" style="width:100%"></div></div></div>
+        <div><span class="status-text">100/100</span><div class="progress-bg"><div class="progress-fill fill-moral" style="width:100%"></div></div></div>
+        <div><span class="status-text">6870/6870</span><div class="progress-bg"><div class="progress-fill fill-health" style="width:100%"></div></div></div>
+    </div>
+
+    <div class="exp-row">
+        <div class="lv-box">LV 84</div>
+        <div class="exp-bar-container">
+            <div id="bar-exp" class="exp-fill"></div>
+            <div id="txt-exp" class="exp-text">35336/76610</div>
+        </div>
+    </div>
+</div>
+
+<!-- MAPA -->
+<div id="viewport-cidade">
+    <div class="mapa-mundo">
+        <div class="predio-container" style="top:350px;left:550px" onclick="abrirModal('academia')">
+            <img class="icone-mapa" src="https://cdn-icons-png.flaticon.com/512/2964/2964514.png">
+            <div class="predio-label">ACADEMIA</div>
+        </div>
+        <div class="predio-container" style="top:200px;left:950px" onclick="abrirModal('loja')">
+            <img class="icone-mapa" src="https://cdn-icons-png.flaticon.com/512/1198/1198463.png">
+            <div class="predio-label">LOJA</div>
+        </div>
+        <div class="predio-container" style="top:550px;left:1050px" onclick="abrirModal('crime')">
+            <img class="icone-mapa" src="https://cdn-icons-png.flaticon.com/512/2554/2554167.png">
+            <div class="predio-label">CRIMES</div>
+        </div>
+    </div>
+</div>
+
+<!-- MENU -->
+<div class="bottom-nav">
+    <div class="nav-item" onclick="abrirModal('academia')"><span>Treino</span></div>
+    <div class="nav-item" onclick="abrirModal('crime')"><span>Crime</span></div>
+    <div class="nav-item" onclick="abrirModal('loja')"><span>Loja</span></div>
+    <div class="nav-item"><span>Perfil</span></div>
+    <div class="nav-item"><span>Chat</span></div>
+    <div class="nav-item"><span>News</span></div>
+</div>
+
+<!-- ACADEMIA -->
+<div id="modal-academia" class="modal-overlay">
+<div class="modal-content">
+<h3 style="text-align:center;color:#58a6ff">Treinamento</h3>
+<div id="feed-academia" class="feedback-msg"></div>
+
+<div class="item-card"><span>💪 Força</span><button class="btn-action" onclick="treinar()">Treinar</button></div>
+<div class="item-card"><span>❤️ Vitalidade</span><button class="btn-action" onclick="treinar()">Treinar</button></div>
+<div class="item-card"><span>⚡ Velocidade</span><button class="btn-action" onclick="treinar()">Treinar</button></div>
+<div class="item-card"><span>🎯 Destreza</span><button class="btn-action" onclick="treinar()">Treinar</button></div>
+
+<button class="btn-fechar" onclick="fecharModais()">FECHAR</button>
+</div>
+</div>
+
+<!-- CRIMES -->
+<div id="modal-crime" class="modal-overlay">
+<div class="modal-content">
+<h3 style="text-align:center;color:#e94560">Crimes</h3>
+<div id="feed-crime" class="feedback-msg"></div>
+
+<div class="item-card"><span>🏪 Roubo simples</span><button class="btn-action" onclick="crime()">10⚡</button></div>
+<div class="item-card"><span>🚗 Assalto</span><button class="btn-action" onclick="crime()">20⚡</button></div>
+<div class="item-card"><span>🏦 Banco</span><button class="btn-action" onclick="crime()">30⚡</button></div>
+
+<button class="btn-fechar" onclick="fecharModais()">FECHAR</button>
+</div>
+</div>
+
+<!-- LOJA -->
+<div id="modal-loja" class="modal-overlay">
+<div class="modal-content">
+<h3 style="text-align:center;color:gold">Mercado</h3>
+<div id="feed-loja" class="feedback-msg"></div>
+
+<div class="item-card"><span>🔫 Pistola</span><button class="btn-action" onclick="comprar(500)">$500</button></div>
+<div class="item-card"><span>🦺 Colete</span><button class="btn-action" onclick="comprar(800)">$800</button></div>
+<div class="item-card"><span>💊 Kit Médico</span><button class="btn-action" onclick="comprar(300)">$300</button></div>
+
+<button class="btn-fechar" onclick="fecharModais()">FECHAR</button>
+</div>
+</div>
+
+<script>
+let money=500, ene=1620, eneMax=2040, exp=35336, expMax=76610;
+
+const crimes=[
+ {c:10,min:80,max:150,xp:300},
+ {c:20,min:180,max:300,xp:700},
+ {c:30,min:300,max:600,xp:1200}
+];
+
+function showFeed(id,msg,ok=true){
+ const el=document.getElementById('feed-'+id);
+ el.textContent=msg;
+ el.className='feedback-msg '+(ok?'msg-success':'msg-error');
+ setTimeout(()=>el.textContent='',1000);
+}
+
+function abrirModal(id){document.getElementById('modal-'+id).style.display='flex'}
+function fecharModais(){document.querySelectorAll('.modal-overlay').forEach(m=>m.style.display='none')}
+document.querySelectorAll('.modal-overlay').forEach(m=>{
+ m.onclick=e=>{if(e.target===m)fecharModais()}
+});
+
+function treinar(){
+ if(ene<20)return showFeed('academia','Sem energia!',false);
+ ene-=20; exp+=450;
+ atualizarUI(); showFeed('academia','Treino concluído +450xp');
+}
+
+function crime(){
+ const r=crimes[Math.floor(Math.random()*crimes.length)];
+ if(ene<r.c)return showFeed('crime','Sem energia!',false);
+ ene-=r.c;
+ const ganho=Math.floor(Math.random()*(r.max-r.min))+r.min;
+ money+=ganho; exp+=r.xp;
+ atualizarUI();
+ showFeed('crime',`+$${ganho} +${r.xp}xp`);
+}
+
+function comprar(p){
+ if(money<p)return showFeed('loja','Dinheiro insuficiente!',false);
+ money-=p; atualizarUI();
+ showFeed('loja','Compra realizada!');
+}
+
+function atualizarUI(){
+ ene=Math.max(0,Math.min(ene,eneMax));
+ exp=Math.min(exp,expMax);
+ document.getElementById('txt-money').textContent=money;
+ document.getElementById('val-ene').textContent=`${ene}/${eneMax}`;
+ document.getElementById('bar-ene').style.width=(ene/eneMax*100)+'%';
+ document.getElementById('txt-exp').textContent=`${exp}/${expMax}`;
+ document.getElementById('bar-exp').style.width=(exp/expMax*100)+'%';
+}
+atualizarUI();
+
+/* DRAG MAPA */
+const v=document.getElementById('viewport-cidade');
+let d=false,sx,sy,sl,st;
+v.addEventListener('mousedown',e=>{d=true;sx=e.pageX;sy=e.pageY;sl=v.scrollLeft;st=v.scrollTop});
+v.addEventListener('mouseup',()=>d=false);
+v.addEventListener('mousemove',e=>{if(!d)return;v.scrollLeft=sl-(e.pageX-sx);v.scrollTop=st-(e.pageY-sy)});
+v.addEventListener('touchstart',e=>{d=true;sx=e.touches[0].pageX;sy=e.touches[0].pageY;sl=v.scrollLeft;st=v.scrollTop});
+v.addEventListener('touchmove',e=>{if(!d)return;v.scrollLeft=sl-(e.touches[0].pageX-sx);v.scrollTop=st-(e.touches[0].pageY-sy)});
+v.addEventListener('touchend',()=>d=false);
+</script>
+
+</body>
+</html>
